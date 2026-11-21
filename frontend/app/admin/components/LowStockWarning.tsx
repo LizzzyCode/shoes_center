@@ -62,7 +62,8 @@ export default function LowStockWarning() {
       <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
         {lowStockItems.map((item) => {
           const imgSrc = item.gambar || item.produk.gambar;
-          const fullImgSrc = imgSrc.startsWith('http') ? imgSrc : `${API_URL}/${imgSrc.replace(/\\/g, '/')}`;
+          const normalizedPath = imgSrc.replace(/\\/g, '/').replace(/^\/+/, '');
+          const fullImgSrc = imgSrc.startsWith('http') ? imgSrc : `${API_URL}/${normalizedPath}`;
 
           return (
             <div key={item.id} className="flex items-center gap-4 p-3 bg-white rounded-lg border border-red-100 shadow-sm">

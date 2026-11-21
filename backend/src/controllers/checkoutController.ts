@@ -151,6 +151,15 @@ export const createCheckout = async (req: AuthRequest, res: Response): Promise<v
         });
       }
 
+      const frontendUrl = (
+        process.env.FRONTEND_URL ||
+        (process.env.VERCEL_PROJECT_PRODUCTION_URL
+          ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+          : process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : 'http://localhost:3000')
+      ).replace(/\/+$/, '');
+
       const parameter = {
         transaction_details: {
           order_id: kodePesanan,
@@ -181,9 +190,9 @@ export const createCheckout = async (req: AuthRequest, res: Response): Promise<v
         },
         // Tambahkan callbacks untuk redirect
         callbacks: {
-          finish: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/riwayat`,
-          error: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/riwayat`,
-          pending: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/riwayat`
+          finish: `${frontendUrl}/riwayat`,
+          error: `${frontendUrl}/riwayat`,
+          pending: `${frontendUrl}/riwayat`
         }
       };
 

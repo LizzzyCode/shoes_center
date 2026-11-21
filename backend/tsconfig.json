@@ -38,6 +38,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
   },
-  "include": ["api/**/*", "src/**/*", "prisma/**/*"],
+  "include": ["src/**/*", "prisma/**/*"],
   "exclude": ["node_modules", "dist", "generated", "public"]
 }
