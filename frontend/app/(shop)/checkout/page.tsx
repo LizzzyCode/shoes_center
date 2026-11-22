@@ -136,7 +136,7 @@ export default function CheckoutPage() {
               >
                 <h2 className="text-lg md:text-xl font-bold text-[#3E2723] mb-4 flex items-center gap-2">
                   <MapPin size={20} className="text-[#5D4037]" />
-                  Alamat Pengiriman
+                  Alamat Pengiriman sepatu
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
