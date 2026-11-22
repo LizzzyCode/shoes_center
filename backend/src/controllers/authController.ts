@@ -2,10 +2,8 @@ import type { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { checkLoginAttempt, recordFailedLogin, resetLoginAttempts } from '../middleware/loginRateLimiter.js';
+import { getJwtSecret } from '../middleware/auth.js';
 import { prisma } from '../lib/prisma.js';
-
-// Note: JWT_SECRET should be in .env in production
-const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_jwt_key_123';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -117,7 +115,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Generate token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: '7d' }
     );
 

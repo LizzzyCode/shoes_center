@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { API_URL } from "@/lib/api";
+import { API_URL, parseJsonSafe } from "@/lib/api";
 
 const registerSchema = z
   .object({
@@ -53,19 +53,22 @@ export const useRegister = () => {
         }),
       });
 
-      const result = await res.json();
+      const result = await parseJsonSafe<{ message?: string }>(res);
 
       if (!res.ok) {
-        toast.error(result.message || "Registrasi gagal");
+        toast.error(
+          result?.message || `Terjadi kesalahan pada server (HTTP ${res.status}). Silakan coba lagi nanti.`
+        );
         return;
       }
 
-      toast.success(result.message || "Registrasi berhasil!");
+      toast.success(result?.message || "Registrasi berhasil!");
       setTimeout(() => {
         router.push("/auth/login");
       }, 1000);
     } catch (error) {
-      toast.error("Terjadi kesalahan pada jaringan");
+      console.error("Register request failed:", error);
+      toast.error("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
     }
   };
 

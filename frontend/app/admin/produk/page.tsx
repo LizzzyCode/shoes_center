@@ -1,5 +1,5 @@
 'use client';
-import { API_URL } from "@/lib/api";
+import { API_URL, parseJsonSafe } from "@/lib/api";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -34,12 +34,13 @@ export default function AdminProduk() {
   const fetchProducts = async () => {
     try {
       const res = await fetch(`${API_URL}/api/products`);
-      const data = await res.json();
-      if (Array.isArray(data)) {
+      const data = await parseJsonSafe<Product[] | { message?: string }>(res);
+      if (res.ok && Array.isArray(data)) {
         setProducts(data);
       } else {
         console.error('Expected array but got:', data);
-        alert(data.message || 'Terjadi kesalahan saat memuat data');
+        const message = !Array.isArray(data) ? data?.message : undefined;
+        alert(message || `Terjadi kesalahan saat memuat data (HTTP ${res.status})`);
         setProducts([]);
       }
     } catch (error) {
@@ -78,8 +79,8 @@ export default function AdminProduk() {
         router.refresh();
         fetchProducts(); // refresh
       } else {
-        const errorData = await res.json();
-        alert(`Gagal menghapus produk: ${errorData.message}`);
+        const errorData = await parseJsonSafe<{ message?: string }>(res);
+        alert(`Gagal menghapus produk: ${errorData?.message || `HTTP ${res.status}`}`);
       }
     } catch (error) {
       console.error('Error deleting:', error);

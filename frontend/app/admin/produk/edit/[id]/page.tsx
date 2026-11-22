@@ -1,5 +1,5 @@
 'use client';
-import { API_URL } from "@/lib/api";
+import { API_URL, parseJsonSafe } from "@/lib/api";
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -105,8 +105,10 @@ export default function EditProduk() {
     }
 
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch(`${API_URL}/api/products/${id}`, {
         method: 'PUT',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: data,
       });
 
@@ -115,8 +117,8 @@ export default function EditProduk() {
         router.refresh();
         router.push('/admin/produk');
       } else {
-        const errorData = await res.json();
-        alert(`Error: ${errorData.message}`);
+        const errorData = await parseJsonSafe<{ message?: string }>(res);
+        alert(`Error: ${errorData?.message || `HTTP ${res.status}`}`);
       }
     } catch (error) {
       console.error(error);

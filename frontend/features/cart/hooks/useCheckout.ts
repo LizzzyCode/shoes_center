@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { API_URL } from "@/lib/api";
+import { API_URL, parseJsonSafe } from "@/lib/api";
 import { useCart, cleanPrice } from "@/features/cart/context/CartContext";
 import { getProfile } from "@/features/profile/services/profileService";
 import { toast } from "sonner";
@@ -118,13 +118,14 @@ export const useCheckout = () => {
 
       console.log('Response status:', res.status);
       
+      const payload = await parseJsonSafe(res);
+
       if (!res.ok) {
-        const errorData = await res.json();
-        console.error('Error response:', errorData);
-        throw new Error(errorData.message || `Gagal membuat pesanan (Status: ${res.status})`);
+        console.error('Error response:', payload);
+        throw new Error(payload?.message || `Gagal membuat pesanan (Status: ${res.status})`);
       }
 
-      const data = await res.json();
+      const data = payload || {};
       console.log('Success response:', data);
 
       if (payment === "midtrans" && data.token) {

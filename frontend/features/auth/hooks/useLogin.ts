@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { API_URL } from "@/lib/api";
+import { API_URL, parseJsonSafe } from "@/lib/api";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email/Username wajib diisi"),
@@ -67,9 +67,21 @@ export const useLogin = () => {
         }),
       });
 
-      const result = await res.json();
+      const result = await parseJsonSafe<{
+        message?: string;
+        token?: string;
+        user?: { id: number; nama: string; email: string; role: string };
+        locked?: boolean;
+        retryAfter?: number;
+        remainingAttempts?: number;
+      }>(res);
 
       if (!res.ok) {
+        if (!result) {
+          toast.error(`Terjadi kesalahan pada server (HTTP ${res.status}). Silakan coba lagi nanti.`);
+          return;
+        }
+
         // Handle rate limit lockout (HTTP 429)
         if (res.status === 429 || result.locked) {
           setLockoutSeconds(result.retryAfter || 900);
@@ -92,6 +104,11 @@ export const useLogin = () => {
         return;
       }
 
+      if (!result?.token || !result?.user) {
+        toast.error("Respons server tidak valid. Silakan coba lagi.");
+        return;
+      }
+
       // Login berhasil — reset state
       setRemainingAttempts(null);
       setLockoutSeconds(0);
@@ -103,14 +120,15 @@ export const useLogin = () => {
 
       toast.success(result.message || "Login berhasil!");
       setTimeout(() => {
-        if (result.user.role === 'ADMIN') {
+        if (result.user?.role === 'ADMIN') {
           router.push("/admin");
         } else {
           router.push("/");
         }
       }, 1000);
     } catch (error) {
-      toast.error("Terjadi kesalahan pada jaringan");
+      console.error("Login request failed:", error);
+      toast.error("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
     }
   };
 
